@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 # LangChain / LangGraph 関連のインポート（重複を整理）
-from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage, SystemMessage
 from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
 from langchain_community.tools import DuckDuckGoSearchRun, WikipediaQueryRun
@@ -58,7 +58,16 @@ def should_continue(state: MessagesState) -> Literal["tools", END]:
     return END
 
 def call_model(state: MessagesState):
-    response = model.invoke(state['messages'])
+    # ここでエージェントへのInstruction（システムプロンプト）を定義します
+    instructions = SystemMessage(content=(
+    "Respond in the user's language. "
+    "You may use any language (English, Chinese, etc.) for internal reasoning or tools to get the best information."
+    ))
+    # SystemMessageを現在の会話履歴(state['messages'])の先頭に結合してモデルに渡す
+    messages = [instructions] + state['messages']
+    # モデルを実行
+    response = model.invoke(messages)
+    
     return {"messages": [response]}
 
 workflow = StateGraph(MessagesState)
