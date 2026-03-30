@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+langchain-ollama
+langgraph
+langchain-community
+duckduckgo-search
+wikipedia
